@@ -1,7 +1,10 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { icons } from "../constants";
 import { ResizeMode, Video } from "expo-av";
+import { useGlobalContext } from "../context/GlobalProvider";
+import { isFavourite, manageFavouritesVideos } from "../lib/appwrite";
+import useAppwrite from "../lib/useAppwrite";
 
 const VideCard = ({
   video: {
@@ -10,8 +13,36 @@ const VideCard = ({
     video,
     creator: { username, avatar },
   },
+  videoId,
 }) => {
+  const { user } = useGlobalContext();
   const [play, setPlay] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const { data: favoriteVideos, isLoading } = useAppwrite(() =>
+    isFavourite(user.$id, videoId)
+  );
+
+  // Check if the video is a favorite
+  useEffect(() => {
+    // const checkIsFavorite = async () => {
+
+    // const isFavorite = await isFavourite(user.$id, videoId);
+    setIsFavorite(favoriteVideos);
+    // };
+    // checkIsFavorite();
+  }, [favoriteVideos, user.$id, videoId]);
+
+  const handleFavourites = async () => {
+    try {
+      // Call the manageFavouritesVideos function with the videoId and userId
+      await manageFavouritesVideos(user.$id, videoId);
+      // Update the isFavorite state
+      setIsFavorite(!isFavorite);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <View className="flex-col items-center px-4 mb-14">
@@ -43,7 +74,13 @@ const VideCard = ({
         </View>
 
         <View className="pt-2">
-          <Image source={icons.menu} className="w-5 h-5" resizeMode="contain" />
+          <TouchableOpacity onPress={handleFavourites} disabled={isLoading}>
+            <Image
+              source={isFavorite ? icons.heartFull : icons.heartOutline}
+              className="w-5 h-5"
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
       </View>
 

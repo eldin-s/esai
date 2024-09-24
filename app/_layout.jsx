@@ -4,6 +4,7 @@ import { useFonts } from "expo-font";
 import { useEffect } from "react";
 
 import GlobalProvider from "../context/GlobalProvider";
+import { StatusBar } from "expo-status-bar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,6 +31,7 @@ const RootLayout = () => {
 
   return (
     <GlobalProvider>
+      <StatusBar backgroundColor="#161622" style="light" />
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
